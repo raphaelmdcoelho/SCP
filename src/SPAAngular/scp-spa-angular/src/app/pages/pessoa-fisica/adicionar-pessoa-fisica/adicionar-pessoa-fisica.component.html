@@ -1,0 +1,429 @@
+<div class="col-md-8 offset-md-2 mt-4">
+
+  <h1>Cadastrar</h1>
+
+  <ng-wizard [config]="config" (stepChanged)="stepChanged($event)">
+
+    <ng-wizard-step [title]="'Dados Pessoais'" [description]="'Etapa 1'">
+      <!-- Step 1 Content -->
+      <hr>
+      <div style="min-height: 380px;">
+        <form [formGroup]="formGroupDadosPessoais" class="mt-3">
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="txtNome">Nome</label>
+              <input type="text" formControlName="primeiroNome" class="form-control" id="txtNome">
+            </div>
+            <div class="form-group col-md-8">
+              <label for="txtSobrenome">Sobrenome</label>
+              <input type="text" formControlName="sobrenome" class="form-control" id="txtSobrenome">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="txtCpf">CPF</label>
+              <input formControlName="cpf" [mask]="CPF_MASK" maxlength="14" class="form-control" id="txtCpf">
+            </div>
+            <div class="form-group col-md-4">
+              <label for="txtRg">RG</label>
+              <input formControlName="rg" [mask]="RG_MASK" maxlength="9" class="form-control" id="txtRg">
+            </div>
+            <div class="form-group col-md-4">
+              <label for="idcGenero">Gênero</label>
+              <select id="idcGenero" class="form-control" formControlName="genero">
+                <option value="null">Selecione</option>
+                <option value="M">Masculino</option>
+                <option value="F">Feminino</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="dthNascimento">Nascimento</label>
+              <input type="date" formControlName="dthNascimento" class="form-control" id="dthNascimento">
+            </div>
+            <div class="form-group col-md-4">
+              <label for="txtAltura">Altura</label>
+              <input type="text" formControlName="altura" class="form-control" id="txtAltura">
+            </div>
+            <div class="form-group col-md-4">
+              <label for="txtPeso">Peso</label>
+              <input type="text" formControlName="peso" class="form-control" id="txtPeso">
+            </div>
+          </div>
+        </form>
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" (click)="changeVinculoPJ()" [checked]="possuiVinculoPJ"
+                [(ngModel)]="possuiVinculoPJ" id="checkVinculo">
+              <label class="form-check-label" for="checkVinculo">
+                Possui vínculo com Pessoa Jurídica
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fim Step 1 Content -->
+    </ng-wizard-step>
+
+    <ng-wizard-step [title]="'Contato'" [description]="'Etapa 2'">
+      <!-- Step 2 Content -->
+
+      <hr>
+      <div class="mt-3" style="min-height: 380px;">
+        <form [formGroup]="formGroupContato">
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="idcTipo">Tipo</label>
+              <select formControlName="tipo" class="form-control" aria-label="Default select example">
+                <option value="null">Selecione</option>
+                <option value="R">Residencial</option>
+                <option value="C">Comercial</option>
+                <option value="O">Outros</option>
+              </select>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="txtDdd">DDD</label>
+              <input type="text" formControlName="dDD" maxlength="2" [mask]="DDD_MASK" class="form-control" id="txtDdd">
+            </div>
+            <div class="form-group col-md-5">
+              <label for="txtNumero">Número</label>
+              <input type="text" formControlName="numero" maxlength="10" [mask]="CONTATO_MASK" class="form-control" id="txtNumero">
+            </div>
+          </div>
+          <button class="btn btn-success" (click)="adicionarContato()">Adicionar</button>
+        </form>
+
+        <table class="table mt-3">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Tipo</th>
+              <th scope="col">DDD</th>
+              <th scope="col">Número</th>
+              <th scope="col">Ações</th>
+            </tr>
+          </thead>
+
+          <ng-container *ngIf="listContatos != null && listContatos.length > 0">
+            <!-- <ng-container *ngFor="let contato of listContatos"> -->
+              <ng-container *ngFor="let contato of listContatos | slice: (pageContato-1) * pageSizeContato : pageContato * pageSizeContato">
+              <tbody>
+                <tr>
+                  <td>{{ contato.tipo }}</td>
+                  <td>{{ contato.dDD }}</td>
+                  <td>{{ contato.numero | mask: '00000-0000' }}</td>
+                  <td>
+                    <button class="btn btn-success btn-sm mr-2"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+                    <button class="btn btn-danger btn-sm mr-2"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
+                    <button class="btn btn-primary btn-sm mr-2"><i class="fa fa-info-circle" aria-hidden="true"></i></button>
+                    <button class="btn btn-warning btn-sm"><i class="fa fa-eye" aria-hidden="true"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </ng-container>
+          </ng-container>
+
+          <tbody *ngIf="listContatos == null">
+            <tr>
+              <td colspan="4" class="text-center">Nenhum item encontrado.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ngb-pagination *ngIf="listContatos != null && listContatos.length > 0"
+          [(page)]="pageContato"
+          [pageSize]="pageSizeContato"
+          [collectionSize]="listContatos.length">
+          <ng-template ngbPaginationFirst>Primeiro</ng-template>
+          <ng-template ngbPaginationLast>Último</ng-template>
+          <ng-template ngbPaginationPrevious>Anterior</ng-template>
+          <ng-template ngbPaginationNext>Próximo</ng-template>
+          <ng-template ngbPaginationEllipsis>...</ng-template>
+          <ng-template ngbPaginationNumber let-page>{{ page }}</ng-template>
+        </ngb-pagination>
+
+      </div>
+
+      <!-- Fim Step 2 Content -->
+    </ng-wizard-step>
+
+    <ng-wizard-step [title]="'Endereço'" [description]="'Etapa 3'">
+      <!-- Step 3 Content -->
+
+      <hr>
+      <div style="min-height: 380px;">
+        <form [formGroup]="formGroupEndereco" class="mt-3">
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="idcTipo">Tipo</label>
+              <select formControlName="tipo" class="form-control" aria-label="Default select example">
+                <option value="null">Selecione</option>
+                <option value="R">Residencial</option>
+                <option value="C">Comercial</option>
+                <option value="O">Outros</option>
+              </select>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="txtCep">CEP</label>
+              <div class="input-group">
+                <input type="text" formControlName="cep" class="form-control" id="txtCep">
+                <span class="input-group-text text-light" id="btn-pesquisar-cep" (click)="consultaCep()"
+                  style="margin-left: -2px; background-color: #28a745;"><i class="fa fa-search"
+                    aria-hidden="true"></i></span>
+              </div>
+            </div>
+            <div class="form-group col-md-5">
+              <label for="txtCidade">Cidade</label>
+              <input type="text" formControlName="cidade" class="form-control" id="txtCidade" readonly>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-3">
+              <label for="txtEstado">Estado</label>
+              <input type="text" formControlName="uf" class="form-control" id="txtEstado" readonly>
+            </div>
+            <div class="form-group col-md-7">
+              <label for="txtLogradouro">Logradouro</label>
+              <input type="text" formControlName="logradouro" class="form-control" id="txtLogradouro" readonly>
+            </div>
+            <div class="form-group col-md-2">
+              <label for="txtNumero">Número</label>
+              <input type="text" formControlName="numeroPorta" class="form-control" id="txtNumero">
+            </div>
+          </div>
+          <button class="btn btn-success" (click)="adicionarEndereco()">Adicionar</button>
+        </form>
+
+        <table class="table mt-3">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Tipo</th>
+              <th scope="col">CEP</th>
+              <th scope="col">Cidade</th>
+              <th scope="col">UF</th>
+              <th scope="col">Logradouro</th>
+              <th scope="col">Número</th>
+              <th scope="col">Ações</th>
+            </tr>
+          </thead>
+
+          <ng-container *ngIf="listEnderecos != null && listEnderecos.length > 0">
+            <ng-container *ngFor="let endereco of listEnderecos">
+              <tbody>
+                <tr>
+                  <td>TODO</td>
+                  <td>{{ endereco.cep }}</td>
+                  <td>{{ endereco.cidade }}</td>
+                  <td>{{ endereco.uf }}</td>
+                  <td>{{ endereco.logradouro }}</td>
+                  <td>{{ endereco.numeroPorta }}</td>
+                  <td>TODO</td>
+                </tr>
+              </tbody>
+            </ng-container>
+          </ng-container>
+
+          <tbody *ngIf="listEnderecos == null">
+            <tr>
+              <td colspan="7" class="text-center">Nenhum item encontrado.</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+
+      <!-- Fim Step 3 Content -->
+    </ng-wizard-step>
+
+    <ng-wizard-step [title]="'Documentos'" [description]="'Etapa 4'">
+      <!-- Step 4 Content -->
+
+      <hr>
+      <div style="min-height: 380px;">
+        <form [formGroup]="formGroupDocumento" class="mt-3">
+          <div class="form-row">
+            <div class="form-group col-md-3">
+              <label for="idcTipo">Tipo</label>
+              <select formControlName="tipo" class="form-control" aria-label="Default select example">
+                <option value="null">Selecione</option>
+                <option value="1">Identificação</option>
+                <option value="2">Certidão</option>
+                <option value="3">Outros</option>
+              </select>
+            </div>
+            <div class="form-group col-md-4">
+              <label for="txtNome">Nome</label>
+              <input type="text" formControlName="nome" class="form-control" id="txtNome">
+            </div>
+            <div class="form-group col-md-5">
+              <label for="txtDocumento">Documento</label>
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="txtDocumento"
+                  (change)="handleFileInput($event.target)">
+                <label class="custom-file-label" for="txtDocumento">Escolher Arquivo</label>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-success" (click)="adicionarDocumento()">Adicionar</button>
+        </form>
+
+        <table class="table mt-3">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Tipo</th>
+              <th scope="col">Nome</th>
+              <th scope="col">Ações</th>
+            </tr>
+          </thead>
+
+          <ng-container *ngIf="listDocumentos != null && listDocumentos.length > 0">
+            <ng-container *ngFor="let documento of listDocumentos">
+              <tbody>
+                <tr>
+                  <td>{{ documento.tipo }}</td>
+                  <td>{{ documento.midia.nome }}</td>
+                  <td>TODO</td>
+                </tr>
+              </tbody>
+            </ng-container>
+          </ng-container>
+
+          <tbody *ngIf="listDocumentos == null">
+            <tr>
+              <td colspan="3" class="text-center">Nenhum item encontrado.</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+
+      <!-- Fim Step 4 Content -->
+    </ng-wizard-step>
+
+    <ng-wizard-step [title]="'Profissão'" [description]="'Etapa 5'">
+      <!-- Step 5 Content -->
+
+      <hr>
+      <div style="min-height: 380px;">
+        <form [formGroup]="formGroupProfissao" class="mt-3">
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label for="idcTipoProfissao">Profissão</label>
+              <select formControlName="idcTipoProfissao" class="form-control" aria-label="Default select example">
+                <option value="null">Selecione</option>
+              </select>
+            </div>
+            <div class="form-group col-md-3">
+              <label for="idcCargo">Cargo</label>
+              <select formControlName="idcCargo" class="form-control" aria-label="Default select example">
+                <option value="null">Selecione</option>
+              </select>
+            </div>
+
+            <div class="form-group col-md-2">
+              <label for="txtSalario">Salário</label>
+              <input type="text" formControlName="txtSalario" class="form-control" id="txtDdd">
+            </div>
+            <div class="form-group col-md-3">
+              <label for="dthInicio">Data Início</label>
+              <input type="date" formControlName="dthInicio" class="form-control" id="txtNumero">
+            </div>
+          </div>
+          <button class="btn btn-success">Adicionar</button>
+        </form>
+
+        <div class="card mt-3">
+          <div class="card-header">
+            Profissão
+          </div>
+          <div class="card-body">
+
+            <!-- esconder card antes de adiconar profissão e mostrar nenhuma profissão adicionada -->
+
+            <div class="row">
+              <div class="col-md-6">
+                <strong>Profissão: </strong>{{ 'teste' }}
+              </div>
+              <div class="col-md-6">
+                <strong>Cargo: </strong>{{ 'teste' }}
+              </div>
+            </div>
+
+            <div class="row mt-2">
+              <div class="col-md-6">
+                <strong>Salário: </strong>{{ 'teste' }}
+              </div>
+              <div class="col-md-6">
+                <strong>Data Início: </strong>{{ 'teste' }}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Fim Step 5 Content -->
+
+    </ng-wizard-step>
+
+    <ng-wizard-step [title]="'Vínculo'" [description]="'Etapa 6'"
+      [state]="possuiVinculoPJ ? stepStates.normal : stepStates.disabled">
+      <!-- Step 6 Content -->
+
+      <span>Step 6 content</span>
+
+      <!-- Fim Step 6 Content -->
+    </ng-wizard-step>
+
+    <ng-wizard-step [title]="'Termo de Adesão'" [description]="'Etapa 7'">
+      <div class="jumbotron" style="overflow: scroll; max-height: 380px;">
+        <h1 class="display-4">Termo de Adesão</h1>
+        <p class="lead">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse suscipit aliquet vulputate.
+          Sed in finibus massa. Curabitur imperdiet ex non maximus lobortis. Curabitur sed ipsum leo. Morbi turpis
+          nulla, eleifend eu convallis et, lacinia interdum purus. Mauris et sodales mi. Lorem ipsum dolor sit amet,
+          consectetur adipiscing elit. Etiam vitae dolor in magna feugiat feugiat at et nisi. Donec nibh nisi, posuere
+          ac vulputate sed, dapibus eget felis. Donec eleifend nisi venenatis tortor tristique, malesuada aliquam massa
+          facilisis. Phasellus pretium tincidunt arcu, non vehicula magna bibendum vel. Phasellus iaculis hendrerit sem
+          quis sodales. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae;
+
+          In leo lorem, dapibus sit amet vestibulum vitae, rhoncus ut mauris. Aliquam felis sem, convallis malesuada
+          molestie non, tempus nec arcu. Praesent efficitur nisi id tellus auctor posuere. Pellentesque vitae odio at
+          diam faucibus laoreet sit amet quis odio. Nulla luctus tincidunt condimentum. Maecenas auctor vulputate enim,
+          vitae semper nibh aliquet nec. Donec in faucibus ipsum, ac aliquet felis. Morbi arcu urna, vestibulum eget
+          augue non, pellentesque lacinia magna. Nam eu dignissim odio. Praesent cursus accumsan feugiat. In et porta
+          lacus. Phasellus in interdum purus.
+
+          Vivamus cursus ligula elit, vel tempor justo aliquam eu. Proin nec lectus quis tellus porta dignissim. Ut
+          dictum arcu a mi tempus, id tempor nisl laoreet. Curabitur ipsum sapien, maximus eget nunc non, consectetur
+          pretium ex. Morbi faucibus venenatis tortor nec convallis. Nunc nec justo sed mi hendrerit hendrerit sit amet
+          ut odio. Morbi rutrum, lorem at commodo maximus, augue elit aliquam est, at posuere sem eros non leo. Fusce
+          sit amet vulputate lacus, sed vehicula turpis. Donec sit amet bibendum sem.
+
+          Vestibulum pretium interdum scelerisque. Interdum et malesuada fames ac ante ipsum primis in faucibus. Mauris
+          vehicula auctor tortor, non mollis enim volutpat id. Fusce malesuada tincidunt ultrices. Ut id viverra nunc.
+          Duis dictum dictum placerat. Fusce varius nisl scelerisque, porttitor ipsum sagittis, tempus tellus. Aenean
+          vitae est at metus posuere laoreet. Suspendisse consequat, nisl non placerat pellentesque, nisl enim malesuada
+          ipsum, non elementum erat tortor a ipsum.</p>
+        <hr class="my-4">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="termoAceite" id="defaultCheck1">
+          <label class="form-check-label" for="defaultCheck1">
+            Eu aceito os termos
+          </label>
+        </div>
+      </div>
+    </ng-wizard-step>
+
+  </ng-wizard>
+
+  <!-- <div>
+    <pre>
+      {{ formGroupDadosPessoais.value | json}}
+    </pre>
+  </div> -->
+
+</div>
